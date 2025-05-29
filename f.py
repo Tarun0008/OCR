@@ -84,18 +84,17 @@ if st.session_state.ocr_done:
         ocr_lines = st.session_state.ocr_lines
 
         # Subject code detection
-        subject_code_pattern = re.compile(r'\b\d{2}[A-Z]{3}\d{2}\b')
+        # Enhanced subject code detection: handles '20MSS25', '20MSSE25', etc.
+        subject_code_pattern = re.compile(r'\b\d{2}[A-Z]{3,4}\d{2}\b')
         subject_codes = []
         for line in ocr_lines:
             matches = subject_code_pattern.findall(line)
             if len(matches) >= 3:
                 subject_codes = matches
                 break
-
         if not subject_codes:
-            st.warning("❌ No subject codes found. Using default.")
-            subject_codes = ['20MSS25', '20MSS12', '20MSS13', '20MSS14', '20MSS15', '20MSS16', '20MSS17', '20MSS18']
-
+                st.error("❌ No valid subject codes found in OCR text. Cannot proceed to table extraction.")
+                st.stop()
         columns = ['Register No.'] + subject_codes
         rows = []
         i = 0
